@@ -28,4 +28,6 @@ ML.js is a powerful and lightweight ES6 JavaScript library designed for Machine 
 ***
 
 ## Documentation
+Click the [Wiki](https://github.com/XHiddenProjects/ML.js/wiki) tab to see the full documentation
 
+***
