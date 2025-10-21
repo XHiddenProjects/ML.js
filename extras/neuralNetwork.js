@@ -328,7 +328,7 @@ _activatePrime(z) {
     const x = this._encodeSample(sample);
     const { activations } = this._forward(x);
     const out = activations[activations.length - 1];
-    
+
     if (this.type === 'classification') {
       const idx = out.indexOf(Math.max(...out));
       return this.classes[idx];
@@ -337,24 +337,32 @@ _activatePrime(z) {
   }
 
   // evaluate on test set: returns accuracy for classification or mse for regression
-  evaluate(dataset = null) {
-    const ds = dataset || this.testData || this.trainData;
-    if (!ds || !ds.length) return { error: 'no data' };
+  evaluate() {
+    if (!this.testData || !this.testData.length) 
+      return null; // No test data to evaluate
     if (this.type === 'classification') {
       let correct = 0;
-      for (const s of ds) {
-        const pred = this.predict(s);
-        if (pred === s[this.labelKey]) correct++;
+      console.log(this.testData);
+      for (const sample of this.testData) {
+
+        const predictedLabel = this.predict(sample);
+        const trueLabel = sample[this.labelKey];
+        if (predictedLabel === trueLabel) correct++;
       }
-      return { accuracy: correct / ds.length };
+      const accuracy = correct / this.testData.length;
+      return { accuracy };
+    } else if (this.type === 'regression') {
+      let sumSquaredError = 0;
+      for (const sample of this.testData) {
+        const predicted = this.predict(sample);
+        const trueVal = Number(sample[this.labelKey]);
+        const error = predicted - trueVal;
+        sumSquaredError += error * error;
+      }
+      const mse = sumSquaredError / this.testData.length;
+      return { mse };
     } else {
-      let se = 0;
-      for (const s of ds) {
-        const p = this.predict(s);
-        const y = Number(s[this.labelKey]) || 0;
-        se += Math.pow(p - y, 2);
-      }
-      return { mse: se / ds.length };
+      return null; // Unknown type
     }
   }
 
