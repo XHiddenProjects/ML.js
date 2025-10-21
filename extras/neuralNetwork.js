@@ -342,9 +342,7 @@ _activatePrime(z) {
       return null; // No test data to evaluate
     if (this.type === 'classification') {
       let correct = 0;
-      console.log(this.testData);
       for (const sample of this.testData) {
-
         const predictedLabel = this.predict(sample);
         const trueLabel = sample[this.labelKey];
         if (predictedLabel === trueLabel) correct++;
