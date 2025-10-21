@@ -503,6 +503,7 @@ export const Supervised = class{
      * @param {number} [options.ratioTrainTest=0.8] - Train-test split ratio.
      * @param {'classification'|'regression'} [options.type='regression'] - Output type.
      * @param {boolean} [options.debug=false] - Debug in console
+     * @param {boolean} [options.ones=false] - Set biases with 1's intend of 0's
      * @returns {NeuralNetwork} - Neural Network trained
      */
     NeuralNetwork(data, features, options) {
