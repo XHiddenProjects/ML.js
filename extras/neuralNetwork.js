@@ -11,6 +11,7 @@ export const NeuralNetwork = class {
       regularization = 'none',
       noise = 0,
       batch = 15,
+      ones = false,
       ratioTrainTest = 0.8,
       type = 'classification',
       debug = false,
@@ -29,6 +30,7 @@ export const NeuralNetwork = class {
     this.type = type === 'regression' ? 'regression' : 'classification';
     this.debug = !!debug;
     this.labelKey = labelKey;
+    this.ones = ones;
 
     // internal
     this.encoders = {}; // for categorical features -> one-hot sizes and maps
@@ -113,10 +115,10 @@ export const NeuralNetwork = class {
       const outSize = layerSizes[i + 1];
       // Xavier/He init depending on activation; keep simple random
       const scale = Math.sqrt(2 / Math.max(1, inSize));
-      const w = new Array(outSize).fill(0).map(() =>
-        new Array(inSize).fill(0).map(() => (Math.random() * 2 - 1) * scale)
+      const w = new Array(outSize).fill(this.ones ? 1 : 0).map(() =>
+        new Array(inSize).fill(this.ones ? 1 : 0).map(() => (Math.random() * 2 - 1) * scale)
       );
-      const b = new Array(outSize).fill(0);
+      const b = new Array(outSize).fill(this.ones ? 1 : 0);
       this.weights.push(w);
       this.biases.push(b);
     }
