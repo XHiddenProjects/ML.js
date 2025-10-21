@@ -1354,6 +1354,7 @@ export const Unsupervised = class {
         }
 
         // Center the data
+        const dataMean = mean(data);
         const X = center(data);
 
         // Initialize separation matrix
@@ -1399,13 +1400,13 @@ export const Unsupervised = class {
         }
 
         function transform(newData) {
-            const centered = center(newData);
+            const centered = newData.map(row => row.map((val, idx) => val - dataMean[idx]));
             return multiplyMatrices(centered, transpose(W));
         }
 
         function project(sample) {
-            const centered = center([sample]);
-            return multiplyMatrices(centered, transpose(W))[0];
+            const centeredSample = sample.map((val, idx) => val - dataMean[idx]);
+            return multiplyMatrices([centeredSample], transpose(W))[0];
         }
 
         return {
