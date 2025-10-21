@@ -27,23 +27,9 @@ export const Supervised = class{
      *   coefficients: { slope: number, intercept: number },
      *   rSquared: number,
      *   residuals: number[],
-     *   standardError: number
+     *   standardError: number,
+     *   bestFit:{x: Number[], y: Number[]}
      * }} 
-     * slope - The slope of the line.
-     * 
-     * intercept - The intercept.
-     * 
-     * predict - Function to make predictions.
-     * 
-     * draw - Function to return the data points of the line
-     * 
-     * coefficients - Object containing slope and intercept.
-     * 
-     * rSquared - How well the line fits the data.
-     * 
-     * residuals - Array of residuals for each data point.
-     * 
-     * standardError - Standard deviation of residuals, indicating prediction accuracy.
      */
     LinearRegression(x, y) {
     if (x.length !== y.length) throw new Error("X and Y do not match");
@@ -95,6 +81,10 @@ export const Supervised = class{
                 points.push({ x: xVal, y: yVal });
             }
             return points;
+        },
+        bestFit: {
+            x: [Math.min(...x),Math.max(...x)],
+            y: [Math.min(...x),Math.max(...x)].map(x=>slope*x+intercept)
         },
         coefficients: { slope: slope, intercept: intercept },
         rSquared: rSquared,
