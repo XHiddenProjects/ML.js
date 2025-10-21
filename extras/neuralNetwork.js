@@ -142,20 +142,30 @@ export const NeuralNetwork = class {
   }
 
   // activation functions and derivatives
-  _activate(z) {
-    if (this.activation === 'sigmoid') {
-      return z.map(v => 1 / (1 + Math.exp(-v)));
-    }
-    // default ReLU
-    return z.map(v => Math.max(0, v));
+  // activation functions
+_activate(z) {
+  if (this.activation === 'sigmoid') {
+    return z.map(v => 1 / (1 + Math.exp(-v)));
+  } else if (this.activation === 'tanh') {
+    return z.map(v => Math.tanh(v));
+  } else if (this.activation === 'linear') {
+    return z.slice(); // linear just returns input
   }
-  _activatePrime(z) {
-    if (this.activation === 'sigmoid') {
-      const s = z.map(v => 1 / (1 + Math.exp(-v)));
-      return s.map(v => v * (1 - v));
-    }
-    return z.map(v => (v > 0 ? 1 : 0));
+  // default ReLU
+  return z.map(v => Math.max(0, v));
+}
+_activatePrime(z) {
+  if (this.activation === 'sigmoid') {
+    const s = z.map(v => 1 / (1 + Math.exp(-v)));
+    return s.map(v => v * (1 - v));
+  } else if (this.activation === 'tanh') {
+    return z.map(v => 1 - Math.tanh(v) * Math.tanh(v));
+  } else if (this.activation === 'linear') {
+    return new Array(z.length).fill(1); // derivative of linear is 1
   }
+  // default ReLU prime
+  return z.map(v => (v > 0 ? 1 : 0));
+}
   _softmax(z) {
     const max = Math.max(...z);
     const exps = z.map(v => Math.exp(v - max));
@@ -267,6 +277,8 @@ export const NeuralNetwork = class {
           // L2 regularization
           let regTerm = 0;
           if (this.regularization === 'l2') regTerm = (this.weights[l][i][j] * 0.0001);
+          // L1 regularization
+          if (this.regularization === 'l1') regTerm = Math.sign(this.weights[l][i][j]) * 0.0001;
           this.weights[l][i][j] -= eta * (nablaW[l][i][j] + regTerm);
         }
         this.biases[l][i] -= eta * nablaB[l][i];

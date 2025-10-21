@@ -439,7 +439,7 @@ export const Supervised = class{
      * @param {Array<{features: [], label:string}>} trainingData - Array of objects with 'features' (array) and 'label'
      * @param {number[]} testPoint - Object with 'features' (array) to classify
      * @param {number} k - Number of neighbors to consider
-     * @returns {Object} Predicted label, distance, and neighbor count
+     * @returns {{predictedLabel: String, distance: Number, neighborCount: Number}} Predicted label, distance, and neighbor count
      */
     KNN(trainingData, testPoint, k) {
         // Array to hold distances and corresponding labels
