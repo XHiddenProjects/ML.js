@@ -1419,7 +1419,7 @@ export const Unsupervised = class {
     /**
      * t-Distributed Stochastic Neighbor Embedding (t-SNE)
      * @param {Array.<Array.<number>>} data - High-dimensional data points (array of points)
-     * @param {Object} options - Configuration options
+     * @param {{perplexity: Number, dim: Number, maxIter: Number, learningRate: Number}} options - Configuration options
      * @returns {Array.<Array.<number>>} Embedded low-dimensional points
      */
     tSNE(data, options = {}) {
