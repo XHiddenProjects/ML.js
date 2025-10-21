@@ -45,7 +45,7 @@ export const Supervised = class{
      * 
      * standardError - Standard deviation of residuals, indicating prediction accuracy.
      */
-    linearRegression(x, y) {
+    LinearRegression(x, y) {
     if (x.length !== y.length) throw new Error("X and Y do not match");
     const n = x.length;
     let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
@@ -114,7 +114,7 @@ export const Supervised = class{
      *
      * @param {Number[][]} X - 2D array of features (each element is an array of feature values for one sample)
      * @param {Number[]} y - Array of labels (0 or 1)
-     * @param {Object} options - Optional settings (learningRate, iterations)
+     * @param {{learningRate: number, iterations: number}} [options={}] - Optional settings (learningRate, iterations)
      * @returns {{
      *   weights: Number[],
      *   bias: Number,
@@ -124,7 +124,7 @@ export const Supervised = class{
      *   drawDecisionBoundary: function(minX, maxX, step): Array
      * }}
      */
-    logisticRegression(X, y, options = {}) {
+    LogisticRegression(X, y, options = {}) {
         const learningRate = options.learningRate || 0.01;
         const iterations = options.iterations || 1000;
         const nSamples = X.length;
@@ -199,7 +199,7 @@ export const Supervised = class{
      *
      * @param {Array[]} data - Array of data points, each is an array of feature values with the label as the last element
      * @param {string[]} features - Array of feature names corresponding to each feature index
-     * @param {Object} options - Optional settings (maxDepth, minSamplesSplit)
+     * @param {{maxDepth: number, minSamplesSplit: number}} options - Optional settings (maxDepth, minSamplesSplit)
      * @returns {{predict: function(number[]): any, tree: {featureIndex: number, featureName: string, featureValue: number, left: {class: string, type: string}, right:{class: string, type: string}, type: string}, features: any[]}} - The decision tree model with predict method
      */
     DecisionTree(data, features = [], options = {}) {
@@ -889,7 +889,7 @@ export const Unsupervised = class {
      * @param {boolean} [options.allowLabels] - Whether the first column contains labels
      * @returns {{centroids: Array.<Array.<number>>, assignments: Array.<number>, iterations: number, labels: Array|undefined}} 
      */
-    kMeansClustering(data, k, options = {}) {
+    KMeansClustering(data, k, options = {}) {
         const maxIterations = options.maxIterations || 100;
         const tolerance = options.tolerance || 1e-4;
 
@@ -1010,7 +1010,7 @@ export const Unsupervised = class {
      *   nClusters: number
      * }} Result object containing clusters and metadata.
      */
-    hierarchicalClustering(data, options = {}) {
+    HierarchicalClustering(data, options = {}) {
         const linkage = options.linkage || 'single';
         const metric = options.metric || 'euclidean';
         const requestedClusters = typeof options.nClusters === 'number' ? Math.max(1, Math.floor(options.nClusters)) : 2;
@@ -1565,7 +1565,7 @@ export const Unsupervised = class {
      * 
      * @throws Will throw an error if data is not an array or its length is less than seasonalPeriod.
      */
-    decomposeTimeSeries(data, seasonalPeriod = 12){
+    DecomposeTimeSeries(data, seasonalPeriod = 12){
         if (!Array.isArray(data) || data.length < seasonalPeriod) 
             throw new Error("Data must be an array with length at least equal to the seasonal period");
         
