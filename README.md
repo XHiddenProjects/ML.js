@@ -22,8 +22,15 @@ ML.js is a powerful and lightweight ES6 JavaScript library designed for Machine 
   - t-Distributed Stochastic Neighbor Embedding (t-SNE)
   - Density-Based Spatial Clustering (DBSCAN)
   - decompose Time Series (DTS)
+- **Reinforcement Learning**
+  - QLearning
+  - DQN
+  - SARSA
+  - PGM
+  - DDPG 
 - **Artificial Intelligence**
   - Natural Language Processing (NLP)
+  - PixelDetection
 
 ***
 
