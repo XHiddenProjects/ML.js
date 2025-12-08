@@ -1,7 +1,13 @@
 export const NeuralNetwork = class {
   constructor(data = [], features = [], options = {}) {
-    this.data = data || [];
-    this.features = features || [];
+    // Normalize features: allow number -> indices
+    if (typeof features === 'number') 
+      this.features = Array.from({ length: features }, (_, i) => i); // [0..features-1]
+    else 
+      this.features = features ?? [];
+    
+
+    this.data = Array.isArray(data) ? data : [];
 
     const {
       hiddenLayers = 1,
@@ -40,47 +46,52 @@ export const NeuralNetwork = class {
     this.weights = []; // weight matrices
     this.biases = []; // bias vectors
 
+    
     if (this.data && this.data.length && this.features && this.features.length) {
-      this._prepare();
-      this._initNetwork();
+        this._prepare();
+        this._initNetwork();
     }
   }
 
   // prepare encoders, determine input/output sizes and split data
   _prepare() {
+    const vectorMode = this.features.length > 0 && typeof this.features[0] === 'number';
     // build encoders for categorical features and determine input size
     this.encoders = {};
     this.inputSize = 0;
 
-    // detect categorical feature values from data
-    for (const feat of this.features) {
-      let isCategorical = false;
-      for (const row of this.data) {
-        const v = row[feat];
-        if (typeof v === 'string' || typeof v === 'boolean') {
-          isCategorical = true;
-          break;
-        }
-      }
-      if (isCategorical) {
-        // build value list
-        const map = {};
-        let idx = 0;
+  if (vectorMode) {
+      this.inputSize = this.features.length;
+  }else{
+      // detect categorical feature values from data
+      for (const feat of this.features) {
+        let isCategorical = false;
         for (const row of this.data) {
-          const val = row[feat];
-          if (!(val in map)) {
-            map[val] = idx++;
+          const v = row[feat];
+          if (typeof v === 'string' || typeof v === 'boolean') {
+            isCategorical = true;
+            break;
           }
         }
-        this.encoders[feat] = { type: 'onehot', map, size: Object.keys(map).length };
-        this.inputSize += this.encoders[feat].size;
-      } else {
-        // treat as numeric
-        this.encoders[feat] = { type: 'numeric', size: 1 };
-        this.inputSize += 1;
+        if (isCategorical) {
+          // build value list
+          const map = {};
+          let idx = 0;
+          for (const row of this.data) {
+            const val = row[feat];
+            if (!(val in map)) {
+              map[val] = idx++;
+            }
+          }
+          this.encoders[feat] = { type: 'onehot', map, size: Object.keys(map).length };
+          this.inputSize += this.encoders[feat].size;
+        } else {
+          // treat as numeric
+          this.encoders[feat] = { type: 'numeric', size: 1 };
+          this.inputSize += 1;
+        }
       }
     }
-
     // handle labels
     if (this.type === 'classification') {
       const classSet = new Map();
@@ -125,20 +136,35 @@ export const NeuralNetwork = class {
   }
 
   // encode a single sample into numeric input vector
+  
+  // encode a single sample into numeric input vector
   _encodeSample(sample) {
+    // Fast path: raw numeric vector input
+    if (Array.isArray(sample)) {
+      return sample.slice();
+    }
+
     const x = [];
     for (const feat of this.features) {
-      const encoder = this.encoders[feat];
       const val = sample[feat];
-      if (encoder.type === 'onehot') {
-        const one = new Array(encoder.size).fill(0);
-        const idx = encoder.map.hasOwnProperty(val) ? encoder.map[val] : -1;
-        if (idx >= 0) one[idx] = 1;
-        x.push(...one);
-      } else {
-        const num = Number(val) || 0;
-        x.push(num);
+
+      // When features are numeric indices, treat as numeric
+      const isIndexFeat = typeof feat === 'number';
+
+      if (!isIndexFeat) {
+        const encoder = this.encoders[feat];
+        if (encoder && encoder.type === 'onehot') {
+          const one = new Array(encoder.size).fill(0);
+          const idx = encoder.map?.hasOwnProperty(val) ? encoder.map[val] : -1;
+          if (idx >= 0) one[idx] = 1;
+          x.push(...one);
+          continue;
+        }
       }
+
+      // Default numeric
+      const num = Number(val) || 0;
+      x.push(num);
     }
     return x;
   }
@@ -335,11 +361,11 @@ _activatePrime(z) {
       const idx = out.indexOf(Math.max(...out));
       return this.classes[idx];
     }
-    return out[0];
+    return out; // return array of outputs
   }
 
   // evaluate on test set: returns accuracy for classification or mse for regression
-  evaluate() {
+  evaluate(returnLoss = true) {
     if (!this.testData || !this.testData.length) 
       return null; // No test data to evaluate
     if (this.type === 'classification') {
@@ -350,6 +376,28 @@ _activatePrime(z) {
         if (predictedLabel === trueLabel) correct++;
       }
       const accuracy = correct / this.testData.length;
+      
+      if (returnLoss) {
+        // compute cross-entropy loss over test set
+        let totalLoss = 0;
+        for (const sample of this.testData) {
+          const x = this._encodeSample(sample);
+          const { activations } = this._forward(x);
+          const out = activations[activations.length - 1];
+          const trueIdx = this.classes.indexOf(sample[this.labelKey]);
+          const predictedProbs = out;
+          const epsilon = 1e-15; // to avoid log(0)
+          for (let i = 0; i < predictedProbs.length; i++) {
+            const prob = Math.max(Math.min(predictedProbs[i], 1 - epsilon), epsilon);
+            if (i === trueIdx) {
+              totalLoss -= Math.log(prob);
+            }
+          }
+        }
+        const avgLoss = totalLoss / this.testData.length;
+        return { accuracy, loss: avgLoss };
+      }
+
       return { accuracy };
     } else if (this.type === 'regression') {
       let sumSquaredError = 0;
@@ -360,6 +408,11 @@ _activatePrime(z) {
         sumSquaredError += error * error;
       }
       const mse = sumSquaredError / this.testData.length;
+
+      if (returnLoss) {
+        return { mse, loss: mse };
+      }
+
       return { mse };
     } else {
       return null; // Unknown type
@@ -367,7 +420,7 @@ _activatePrime(z) {
   }
 
   // convenience: train on provided data (re-prepare and re-init)
-  trainOn(data, features, options = {}) {
+  train(data, features, options = {}) {
     this.data = data.slice();
     this.features = features.slice();
     Object.assign(this, options); // allow overriding simple top-level opts if provided
@@ -390,5 +443,4 @@ _activatePrime(z) {
       return this.data[closestIndex][key]??0;
     }
   }
-
 };

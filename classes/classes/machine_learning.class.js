@@ -3,6 +3,11 @@ import { SVM } from '../extras/svm.js';
 import { NeuralNetwork } from '../extras/neuralNetwork.js';
 import { MLMath } from './mlmath.class.js';
 import { DBScan } from '../extras/dbscan.js';
+import { QLearning } from '../extras/qlearning.js';
+import { DQNAgent } from '../extras/dqn.js';
+import { SARSA } from '../extras/sarsa.js';
+import { PolicyGradient } from '../extras/pgm.js';
+import { DDPGAgent } from '../extras/ddpg.js';
 // END EXTRA CLASSES
 
 /**
@@ -1613,3 +1618,93 @@ export const Unsupervised = class {
     }
 }
 
+/**
+ * Reinforcement Learning Algorithms
+ *
+ * @class Reinforcement
+ */
+export const Reinforcement = class{
+    constructor(){
+
+    }
+    
+    /**
+     * Q-Learning 
+     *
+     * @param {Number} numStates — The number of states in the environment.
+     * @param {Number} numActions — The number of possible actions.
+     * @param {{
+     * learningRate: Number,
+     * discountFactor: Number,
+     * epsilon: Number
+     * }} [options={}] - Change the learning rate, discount factor, and epsilon
+     */
+    QLearning(states, action, options={}){
+        const {
+            learningRate = 0.1,
+            discountFactor = 0.9,
+            epsilon = 0.2
+        } = options;
+        const qlearning = new QLearning(states,action,learningRate,discountFactor,epsilon);
+        return qlearning;
+    }
+    
+    /**
+     * Creates a Deep Q-Network agent
+     * @param {Object} params - Configuration parameters
+     * @param {number} params.stateSize - Dimension of state input
+     * @param {number} params.actionSize - Number of possible actions
+     * @param {{gamma: Number, 
+     * epsilonStart: Number, 
+     * epsilonMin: Number, 
+     * epsilonDecay: Number,
+     * learningRate: Number,
+     * batchSize: Number,
+     * trainStart: Number,
+     * targetUpdateFrequency: Number,
+     * memoryCapacity: Number
+     * }} params.options - Additional options for training
+     */
+    DQN({stateSize, actionSize, options={}}){
+        const agent = new DQNAgent(stateSize,actionSize,options);
+        return agent;
+    }
+    
+    /**
+     * Creates an instance of SARSA.
+     *
+     * @param {String[]} states 
+     * @param {String[]} actions 
+     * @param {{alpha: Number, gamma: Number, epsilon: Number}} [options={}] 
+     * @returns {*} 
+     */
+    SARSA(states,actions,options={}){
+        const agent = new SARSA(states,actions,options);
+        return agent;
+    }
+    /**
+     * Initializes the Policy Gradient agent.
+     * @param {number} stateSize - Size of the state space.
+     * @param {number} actionSize - Number of possible actions.
+     * @param {number} learningRate - Learning rate for gradient ascent.
+     */
+    PGM(state,action,learningRate){
+        const pgm = new PolicyGradient(state,action,learningRate);
+        return pgm
+    }
+    /**
+     * Creates an instance of DDPGAgent.
+     * @param {number} stateSize - Dimension of the state space.
+     * @param {number} actionSize - Dimension of the action space.
+     * @param {Object} [options={}] - Optional parameters for agent configuration.
+     * @param {number} [options.gamma=0.99] - Discount factor for future rewards.
+     * @param {number} [options.actorLearningRate=0.001] - Learning rate for the actor network.
+     * @param {number} [options.criticLearningRate=0.002] - Learning rate for the critic network.
+     * @param {number} [options.memoryCapacity=10000] - Capacity of the experience replay buffer.
+     * @param {number} [options.batchSize=64] - Batch size for training.
+     */
+    DDPG(state,action,options={}){
+        const agent = new DDPGAgent(state,action,options);
+        return agent;
+    }
+}
