@@ -42,7 +42,11 @@ export const NeuralNetwork = class {
     this.encoders = {}; // for categorical features -> one-hot sizes and maps
     this.classes = []; // label classes for classification
     this.inputSize = 0;
-    this.outputSize = this.type === 'classification' ? 0 : 1;
+    
+    this.outputSize = options.outputSize && this.type === 'regression'
+    ? Math.max(1, Number(options.outputSize))
+    : (this.type === 'classification' ? 0 : 1);
+
     this.weights = []; // weight matrices
     this.biases = []; // bias vectors
 
