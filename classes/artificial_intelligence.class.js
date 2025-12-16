@@ -230,6 +230,7 @@ export const NLP = class {
 
 
 /**
+ * **Convolutional Neural Network:**
  * Compares 2 different images or videos and computes a similarity score.
  *
  * Features:
@@ -241,7 +242,7 @@ export const NLP = class {
  * NOTE: Designed for browser environments (uses <canvas>). If you use Node,
  *       provide a canvas polyfill or adapt loading functions.
  */
-export const PixelDetection = class {
+export const CNN = class {
 	/**
 	 * @param {Object} [options]
 	 * @param {number} [options.targetSize=256] - Square target dimension (px) for analysis.
