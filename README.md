@@ -30,7 +30,7 @@ ML.js is a powerful and lightweight ES6 JavaScript library designed for Machine 
   - DDPG 
 - **Artificial Intelligence**
   - Natural Language Processing (NLP)
-  - PixelDetection
+  - Convolutional Neural Network (CNN)
 
 ***
 
